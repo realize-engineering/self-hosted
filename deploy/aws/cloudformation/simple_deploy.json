@@ -342,6 +342,9 @@
                                 "echo \"NEXT_PUBLIC_SENTRY_ENABLED=false\" >> .env",
                                 "echo \"NEXT_PUBLIC_STRIPE_ENABLED=false\" >> .env",
                                 "echo \"NEXT_PUBLIC_GOOGLE_SHEETS_ENABLED=false\" >> .env",
+                                "echo \"STRIPE_BASIC_PLAN_PRICE_ID=1\" >> .env",
+                                "echo \"NEXT_PUBLIC_BASIC_PLAN_DASHBOARD_CAP=1\" >> .env",
+                                "echo \"NEXT_PUBLIC_BASIC_PLAN_QUESTIONS_CAP=10\" >> .env",
                                 "sudo caddy stop",
                                 "(sudo caddy reverse-proxy --from $(curl -s ifconfig.me).nip.io --to :3000 &) && (sudo docker-compose up -d)"
                             ]
