@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "Template deploys an olli ec2 instance + bucket within a VPC.",
+    "Description": "Template deploys an olli ec2 instance within a VPC.",
     "Metadata": {
         "AWS::CloudFormation::Designer": {
             "12d7e160-0a80-41e1-9076-14d9d321b425": {
@@ -349,40 +349,6 @@
                                         }
                                     ]
                                 },
-
-                                {
-                                    "Fn::Sub": [
-                                        "echo \"S3_USER_ACCESS_ID=${ACCESS_ID}\" >> .env",
-                                        {
-                                            "ACCESS_ID": {
-                                                "Ref": "OlliProvisionedUserKeys"
-                                            }
-                                        }
-                                    ]
-                                },
-                                {
-                                    "Fn::Sub": [
-                                        "echo \"S3_USER_SECRET_KEY=${SECRET_KEY}\" >> .env",
-                                        {
-                                            "SECRET_KEY": {
-                                                "Fn::GetAtt": [
-                                                    "OlliProvisionedUserKeys",
-                                                    "SecretAccessKey"
-                                                ]
-                                            }
-                                        }
-                                    ]
-                                },
-                                {
-                                    "Fn::Sub": [
-                                        "echo \"PROVISIONED_BUCKET_NAME=${BUCKET_NAME}\" >> .env",
-                                        {
-                                            "BUCKET_NAME": {
-                                                "Ref": "OlliProvisionedBucket"
-                                            }
-                                        }
-                                    ]
-                                },
                                 "echo \"REDIS_URL=redis://localhost:6379\" >> .env",
                                 "echo \"NEXT_PUBLIC_POSTHOG_API_TOKEN=1\" >> .env",
                                 "echo \"NEXT_PUBLIC_SENTRY_DSN=1\" >> .env",
@@ -430,63 +396,6 @@
             },
             "DependsOn": ["OlliProvisionedUser"]
         },
-        "OlliProvisionedBucket": {
-            "Type": "AWS::S3::Bucket",
-            "Properties": {
-                "CorsConfiguration": {
-                    "CorsRules": [
-                        {
-                            "AllowedHeaders": ["*"],
-                            "AllowedMethods": ["GET", "PUT", "POST"],
-                            "AllowedOrigins": ["*"],
-                            "ExposedHeaders": ["ETag"]
-                        }
-                    ]
-                },
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": {
-                            "Fn::Sub": "${AWS::StackName}-olli-bucket-1"
-                        }
-                    }
-                ],
-                "BucketEncryption": {
-                    "ServerSideEncryptionConfiguration": [
-                        {
-                            "ServerSideEncryptionByDefault": {
-                                "SSEAlgorithm": "AES256"
-                            },
-                            "BucketKeyEnabled": true
-                        }
-                    ]
-                },
-                "PublicAccessBlockConfiguration": {
-                    "BlockPublicAcls": true,
-                    "BlockPublicPolicy": true,
-                    "IgnorePublicAcls": true,
-                    "RestrictPublicBuckets": true
-                }
-            },
-            "Metadata": {
-                "AWS::CloudFormation::Designer": {
-                    "id": "af0c845b-f4f3-4d92-9488-ab4306d11151"
-                }
-            }
-        },
-        "OlliProvisionedUserKeys": {
-            "Type": "AWS::IAM::AccessKey",
-            "Properties": {
-                "UserName": {
-                    "Ref": "OlliProvisionedUser"
-                }
-            },
-            "Metadata": {
-                "AWS::CloudFormation::Designer": {
-                    "id": "9f44a320-98cb-4f48-8843-8c51edd67f0b"
-                }
-            }
-        },
         "OlliProvisionedUser": {
             "Type": "AWS::IAM::User",
             "Properties": {
@@ -503,53 +412,6 @@
             "Metadata": {
                 "AWS::CloudFormation::Designer": {
                     "id": "2fdd17ad-0f65-46e0-9597-44875772b447"
-                }
-            },
-            "DependsOn": ["OlliProvisionedBucket"]
-        },
-        "OlliS3Policy": {
-            "Type": "AWS::IAM::Policy",
-            "Properties": {
-                "PolicyName": "S3OlliPolicy",
-                "PolicyDocument": {
-                    "Version": "2012-10-17",
-                    "Statement": [
-                        {
-                            "Effect": "Allow",
-                            "Action": "*",
-                            "Resource": [
-                                {
-                                    "Fn::GetAtt": [
-                                        "OlliProvisionedBucket",
-                                        "Arn"
-                                    ]
-                                },
-                                {
-                                    "Fn::Sub": [
-                                        "${bucketArn}/*",
-                                        {
-                                            "bucketArn": {
-                                                "Fn::GetAtt": [
-                                                    "OlliProvisionedBucket",
-                                                    "Arn"
-                                                ]
-                                            }
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                },
-                "Users": [
-                    {
-                        "Ref": "OlliProvisionedUser"
-                    }
-                ]
-            },
-            "Metadata": {
-                "AWS::CloudFormation::Designer": {
-                    "id": "a6609656-fabb-487f-a506-84b6271aa1e6"
                 }
             }
         }
@@ -596,6 +458,11 @@
             "Type": "String",
             "MinLength": 1
         },
+        "pineconeIndexName": {
+            "Description": "The name of your pinecone index. Your index should use the cosine metric and have dimensions of 1536.",
+            "Type": "String",
+            "MinLength": 1
+        },
         "pineconeAPIKey": {
             "Description": "The API Key of your pinecone index. Pinecone is used to help Olli learn about your data.",
             "Type": "String",
@@ -603,11 +470,6 @@
         },
         "pineconeEnvironment": {
             "Description": "The region of your pinecone index. E.g. production-12345.svc.<PINECONE_ENVIRONMENT>.pinecone.io",
-            "Type": "String",
-            "MinLength": 1
-        },
-        "pineconeIndexName": {
-            "Description": "The name of your pinecone index. Your index should use the cosine metric and have dimensions of 1536.",
             "Type": "String",
             "MinLength": 1
         }
