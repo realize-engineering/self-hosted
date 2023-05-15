@@ -297,7 +297,7 @@
 
                                 {
                                     "Fn::Sub": [
-                                        "echo 'SAMPLE_DATABASE_DETAILS={\"nickname\":\"sample_data\",\"host\":\"sample_data\",\"port\":5432,\"database\":\"sample_data\",\"username\":\"${POSTGRES_USER:-root}\",\"password\":\"${POSTGRES_PASSWORD:-root}\"}' >> .env",
+                                        "echo 'SAMPLE_DATABASE_DETAILS={\"nickname\":\"sample_data\",\"host\":\"sample_data\",\"port\":5432,\"database\":\"sample_data\",\"username\":\"${POSTGRES_USER}\",\"password\":\"${POSTGRES_PASSWORD}\"}' >> .env",
                                         {
                                             "POSTGRES_PASSWORD": {
                                                 "Ref": "databasePassword"
