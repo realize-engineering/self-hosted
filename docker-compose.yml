@@ -3,8 +3,12 @@ services:
   app:
     image: ghcr.io/realize-engineering/ideal-computing-machine:main
     depends_on:
-      - db
-      - cache
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_started
+      sample_data:
+        condition: service_healthy
     ports:
       - "3000:3000"
     volumes:
@@ -17,7 +21,7 @@ services:
       - NODE_ENV=production
       - DATABASE_URL=postgres://${POSTGRES_USER:-root}:${POSTGRES_PASSWORD:-root}@db:5432/olli
       - REDIS_URL=redis://cache:6379
-      - OPENAI_BASE_URL=https://openai-proxy.olli.ai/v1
+      - SAMPLE_DATABASE_DETAILS={"nickname":"Sample Data","host":"sample_data","port":5432,"database":"sample_data","username":"${POSTGRES_USER:-root}","password":"${POSTGRES_PASSWORD:-root}"}
 
   db:
     image: postgres:15-alpine
@@ -30,6 +34,11 @@ services:
       - "5432:5432"
     volumes:
       - db:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   cache:
     image: redis:7-alpine
@@ -39,8 +48,28 @@ services:
     volumes:
       - cache:/data
 
+  sample_data:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-root}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-root}
+      - POSTGRES_DB=sample_data
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./sample_db_scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - sample_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
 volumes:
   db:
     driver: local
   cache:
+    driver: local
+  sample_data:
     driver: local
