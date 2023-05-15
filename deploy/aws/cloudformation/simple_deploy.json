@@ -244,6 +244,16 @@
                                         }
                                     ]
                                 },
+                                {
+                                    "Fn::Sub": [
+                                        "echo \"OPENAI_API_KEY=${OPENAI_API_KEY}\" >> .env",
+                                        {
+                                            "OPENAI_API_KEY": {
+                                                "Ref": "openAPIKey"
+                                            }
+                                        }
+                                    ]
+                                },
                                 "echo \"POSTGRES_DB=db\" >> .env",
                                 {
                                     "Fn::Sub": [
@@ -281,13 +291,60 @@
                                 "echo \"STRIPE_WEBHOOK_SECRET=1\" >> .env",
                                 "echo \"STRIPE_PRO_PLAN_PRICE_ID=1\" >> .env",
                                 "echo \"POSTMARK_SERVER_TOKEN=1\" >> .env",
+                                "echo \"CONTEXT_ENABLED=true\" >> .env",
                                 "echo \"POSTMARK_ACCOUNT_TOKEN=1\" >> .env",
+                                "echo \"LOOPS_API_KEY=1\" >> .env",
+
                                 {
                                     "Fn::Sub": [
-                                        "echo \"OPENAI_PROXY_KEY=${LICENSE_KEY}\" >> .env",
+                                        "echo 'SAMPLE_DATABASE_DETAILS={\"nickname\":\"sample_data\",\"host\":\"sample_data\",\"port\":5432,\"database\":\"sample_data\",\"username\":\"${POSTGRES_USER:-root}\",\"password\":\"${POSTGRES_PASSWORD:-root}\"}' >> .env",
+                                        {
+                                            "POSTGRES_PASSWORD": {
+                                                "Ref": "databasePassword"
+                                            },
+                                            "POSTGRES_USER": {
+                                                "Ref": "databaseUsername"
+                                            }
+                                        }
+                                    ]
+                                },
+
+                                {
+                                    "Fn::Sub": [
+                                        "echo \"LICENSE_KEY=${LICENSE_KEY}\" >> .env",
                                         {
                                             "LICENSE_KEY": {
                                                 "Ref": "licenseKey"
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "Fn::Sub": [
+                                        "echo \"PINECONE_API_KEY=${PINECONE_API_KEY}\" >> .env",
+                                        {
+                                            "PINECONE_API_KEY": {
+                                                "Ref": "pineconeAPIKey"
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "Fn::Sub": [
+                                        "echo \"PINECONE_ENVIRONMENT=${PINECONE_ENVIRONMENT}\" >> .env",
+                                        {
+                                            "PINECONE_ENVIRONMENT": {
+                                                "Ref": "pineconeEnvironment"
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "Fn::Sub": [
+                                        "echo \"PINECONE_INDEX_NAME=${PINECONE_INDEX_NAME}\" >> .env",
+                                        {
+                                            "PINECONE_INDEX_NAME": {
+                                                "Ref": "pineconeIndexName"
                                             }
                                         }
                                     ]
@@ -338,6 +395,7 @@
                                 "echo \"QSTASH_URL=1\" >> .env",
                                 "echo \"GCLOUD_PROJECT_ID=1\" >> .env",
                                 "echo \"GCLOUD_CLIENT_EMAIL=1\" >> .env",
+                                "echo \"RECOIL_DUPLICATE_ATOM_KEY_CHECKING_ENABLED=false\" >> .env",
                                 "echo \"GCLOUD_PRIVATE_KEY=1\" >> .env",
                                 "echo \"NEXT_PUBLIC_SENTRY_ENABLED=false\" >> .env",
                                 "echo \"NEXT_PUBLIC_STRIPE_ENABLED=false\" >> .env",
@@ -531,6 +589,26 @@
         "VPC": {
             "Description": "The VPC to run olli inside of",
             "Type": "AWS::EC2::VPC::Id",
+            "MinLength": 1
+        },
+        "openAPIKey": {
+            "Description": "Your OpenAI API secret key. This key must have gpt-4 access. Contact Olli team for further details.",
+            "Type": "String",
+            "MinLength": 1
+        },
+        "pineconeAPIKey": {
+            "Description": "The API Key of your pinecone index. Pinecone is used to help Olli learn about your data.",
+            "Type": "String",
+            "MinLength": 1
+        },
+        "pineconeEnvironment": {
+            "Description": "The region of your pinecone index. E.g. production-12345.svc.<PINECONE_ENVIRONMENT>.pinecone.io",
+            "Type": "String",
+            "MinLength": 1
+        },
+        "pineconeIndexName": {
+            "Description": "The name of your pinecone index. Your index should use the cosine metric and have dimensions of 1536.",
+            "Type": "String",
             "MinLength": 1
         }
     },
