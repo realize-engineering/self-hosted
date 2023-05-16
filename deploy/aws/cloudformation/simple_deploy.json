@@ -463,7 +463,7 @@
             "MinLength": 1
         },
         "pineconeAPIKey": {
-            "Description": "The API Key of your pinecone index. Pinecone is used to help Olli learn about your data.",
+            "Description": "The API Key of your pinecone index. Pinecone is used to help Olli learn about your data. Create your pinecone index at https://www.pinecone.io/",
             "Type": "String",
             "MinLength": 1
         },
