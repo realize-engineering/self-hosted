@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "Template deploys an olli ec2 instance + bucket within a VPC.",
+    "Description": "Template deploys an olli ec2 instance within a VPC.",
     "Metadata": {
         "AWS::CloudFormation::Designer": {
             "12d7e160-0a80-41e1-9076-14d9d321b425": {
@@ -244,6 +244,16 @@
                                         }
                                     ]
                                 },
+                                {
+                                    "Fn::Sub": [
+                                        "echo \"OPENAI_API_KEY=${OPENAI_API_KEY}\" >> .env",
+                                        {
+                                            "OPENAI_API_KEY": {
+                                                "Ref": "openAPIKey"
+                                            }
+                                        }
+                                    ]
+                                },
                                 "echo \"POSTGRES_DB=db\" >> .env",
                                 {
                                     "Fn::Sub": [
@@ -281,13 +291,19 @@
                                 "echo \"STRIPE_WEBHOOK_SECRET=1\" >> .env",
                                 "echo \"STRIPE_PRO_PLAN_PRICE_ID=1\" >> .env",
                                 "echo \"POSTMARK_SERVER_TOKEN=1\" >> .env",
+                                "echo \"CONTEXT_ENABLED=true\" >> .env",
                                 "echo \"POSTMARK_ACCOUNT_TOKEN=1\" >> .env",
+                                "echo \"LOOPS_API_KEY=1\" >> .env",
+
                                 {
                                     "Fn::Sub": [
-                                        "echo \"OPENAI_PROXY_KEY=${LICENSE_KEY}\" >> .env",
+                                        "echo 'SAMPLE_DATABASE_DETAILS={\"nickname\":\"sample_data\",\"host\":\"sample_data\",\"port\":5432,\"database\":\"sample_data\",\"username\":\"${POSTGRES_USER}\",\"password\":\"${POSTGRES_PASSWORD}\"}' >> .env",
                                         {
-                                            "LICENSE_KEY": {
-                                                "Ref": "licenseKey"
+                                            "POSTGRES_PASSWORD": {
+                                                "Ref": "databasePassword"
+                                            },
+                                            "POSTGRES_USER": {
+                                                "Ref": "databaseUsername"
                                             }
                                         }
                                     ]
@@ -295,33 +311,40 @@
 
                                 {
                                     "Fn::Sub": [
-                                        "echo \"S3_USER_ACCESS_ID=${ACCESS_ID}\" >> .env",
+                                        "echo \"LICENSE_KEY=${LICENSE_KEY}\" >> .env",
                                         {
-                                            "ACCESS_ID": {
-                                                "Ref": "OlliProvisionedUserKeys"
+                                            "LICENSE_KEY": {
+                                                "Ref": "licenseKey"
                                             }
                                         }
                                     ]
                                 },
                                 {
                                     "Fn::Sub": [
-                                        "echo \"S3_USER_SECRET_KEY=${SECRET_KEY}\" >> .env",
+                                        "echo \"PINECONE_API_KEY=${PINECONE_API_KEY}\" >> .env",
                                         {
-                                            "SECRET_KEY": {
-                                                "Fn::GetAtt": [
-                                                    "OlliProvisionedUserKeys",
-                                                    "SecretAccessKey"
-                                                ]
+                                            "PINECONE_API_KEY": {
+                                                "Ref": "pineconeAPIKey"
                                             }
                                         }
                                     ]
                                 },
                                 {
                                     "Fn::Sub": [
-                                        "echo \"PROVISIONED_BUCKET_NAME=${BUCKET_NAME}\" >> .env",
+                                        "echo \"PINECONE_ENVIRONMENT=${PINECONE_ENVIRONMENT}\" >> .env",
                                         {
-                                            "BUCKET_NAME": {
-                                                "Ref": "OlliProvisionedBucket"
+                                            "PINECONE_ENVIRONMENT": {
+                                                "Ref": "pineconeEnvironment"
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "Fn::Sub": [
+                                        "echo \"PINECONE_INDEX_NAME=${PINECONE_INDEX_NAME}\" >> .env",
+                                        {
+                                            "PINECONE_INDEX_NAME": {
+                                                "Ref": "pineconeIndexName"
                                             }
                                         }
                                     ]
@@ -338,10 +361,10 @@
                                 "echo \"QSTASH_URL=1\" >> .env",
                                 "echo \"GCLOUD_PROJECT_ID=1\" >> .env",
                                 "echo \"GCLOUD_CLIENT_EMAIL=1\" >> .env",
+                                "echo \"RECOIL_DUPLICATE_ATOM_KEY_CHECKING_ENABLED=false\" >> .env",
                                 "echo \"GCLOUD_PRIVATE_KEY=1\" >> .env",
                                 "echo \"NEXT_PUBLIC_SENTRY_ENABLED=false\" >> .env",
                                 "echo \"NEXT_PUBLIC_STRIPE_ENABLED=false\" >> .env",
-                                "echo \"NEXT_PUBLIC_GOOGLE_SHEETS_ENABLED=false\" >> .env",
                                 "echo \"STRIPE_BASIC_PLAN_PRICE_ID=1\" >> .env",
                                 "echo \"NEXT_PUBLIC_BASIC_PLAN_DASHBOARD_CAP=1\" >> .env",
                                 "echo \"NEXT_PUBLIC_BASIC_PLAN_QUESTIONS_CAP=10\" >> .env",
@@ -372,63 +395,6 @@
             },
             "DependsOn": ["OlliProvisionedUser"]
         },
-        "OlliProvisionedBucket": {
-            "Type": "AWS::S3::Bucket",
-            "Properties": {
-                "CorsConfiguration": {
-                    "CorsRules": [
-                        {
-                            "AllowedHeaders": ["*"],
-                            "AllowedMethods": ["GET", "PUT", "POST"],
-                            "AllowedOrigins": ["*"],
-                            "ExposedHeaders": ["ETag"]
-                        }
-                    ]
-                },
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": {
-                            "Fn::Sub": "${AWS::StackName}-olli-bucket-1"
-                        }
-                    }
-                ],
-                "BucketEncryption": {
-                    "ServerSideEncryptionConfiguration": [
-                        {
-                            "ServerSideEncryptionByDefault": {
-                                "SSEAlgorithm": "AES256"
-                            },
-                            "BucketKeyEnabled": true
-                        }
-                    ]
-                },
-                "PublicAccessBlockConfiguration": {
-                    "BlockPublicAcls": true,
-                    "BlockPublicPolicy": true,
-                    "IgnorePublicAcls": true,
-                    "RestrictPublicBuckets": true
-                }
-            },
-            "Metadata": {
-                "AWS::CloudFormation::Designer": {
-                    "id": "af0c845b-f4f3-4d92-9488-ab4306d11151"
-                }
-            }
-        },
-        "OlliProvisionedUserKeys": {
-            "Type": "AWS::IAM::AccessKey",
-            "Properties": {
-                "UserName": {
-                    "Ref": "OlliProvisionedUser"
-                }
-            },
-            "Metadata": {
-                "AWS::CloudFormation::Designer": {
-                    "id": "9f44a320-98cb-4f48-8843-8c51edd67f0b"
-                }
-            }
-        },
         "OlliProvisionedUser": {
             "Type": "AWS::IAM::User",
             "Properties": {
@@ -445,53 +411,6 @@
             "Metadata": {
                 "AWS::CloudFormation::Designer": {
                     "id": "2fdd17ad-0f65-46e0-9597-44875772b447"
-                }
-            },
-            "DependsOn": ["OlliProvisionedBucket"]
-        },
-        "OlliS3Policy": {
-            "Type": "AWS::IAM::Policy",
-            "Properties": {
-                "PolicyName": "S3OlliPolicy",
-                "PolicyDocument": {
-                    "Version": "2012-10-17",
-                    "Statement": [
-                        {
-                            "Effect": "Allow",
-                            "Action": "*",
-                            "Resource": [
-                                {
-                                    "Fn::GetAtt": [
-                                        "OlliProvisionedBucket",
-                                        "Arn"
-                                    ]
-                                },
-                                {
-                                    "Fn::Sub": [
-                                        "${bucketArn}/*",
-                                        {
-                                            "bucketArn": {
-                                                "Fn::GetAtt": [
-                                                    "OlliProvisionedBucket",
-                                                    "Arn"
-                                                ]
-                                            }
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                },
-                "Users": [
-                    {
-                        "Ref": "OlliProvisionedUser"
-                    }
-                ]
-            },
-            "Metadata": {
-                "AWS::CloudFormation::Designer": {
-                    "id": "a6609656-fabb-487f-a506-84b6271aa1e6"
                 }
             }
         }
@@ -531,6 +450,26 @@
         "VPC": {
             "Description": "The VPC to run olli inside of",
             "Type": "AWS::EC2::VPC::Id",
+            "MinLength": 1
+        },
+        "openAPIKey": {
+            "Description": "Your OpenAI API secret key. This key must have gpt-4 access. Contact Olli team for further details.",
+            "Type": "String",
+            "MinLength": 1
+        },
+        "pineconeIndexName": {
+            "Description": "The name of your pinecone index. Your index should use the cosine metric and have dimensions of 1536.",
+            "Type": "String",
+            "MinLength": 1
+        },
+        "pineconeAPIKey": {
+            "Description": "The API Key of your pinecone index. Pinecone is used to help Olli learn about your data. Create your pinecone index at https://www.pinecone.io/",
+            "Type": "String",
+            "MinLength": 1
+        },
+        "pineconeEnvironment": {
+            "Description": "The region of your pinecone index. E.g. production-12345.svc.<PINECONE_ENVIRONMENT>.pinecone.io",
+            "Type": "String",
             "MinLength": 1
         }
     },
