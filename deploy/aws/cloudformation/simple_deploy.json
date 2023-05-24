@@ -299,6 +299,7 @@
                                         }
                                     ]
                                 },
+                                "echo \"NEXT_TELEMETRY_DISABLED=1\" >> .env",
                                 "echo \"BASE_URL=https://$(curl -s ifconfig.me).nip.io\" >> .env",
                                 {
                                     "Fn::Sub": [
@@ -322,6 +323,8 @@
                                 },
                                 "echo \"NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=1\" >> .env",
                                 "echo \"STRIPE_SECRET_KEY=1\" >> .env",
+                                "echo \"NEXT_PUBLIC_PRIVATE_CLOUD_DEPLOY=true\" >> .env",
+                                "echo \"NEXT_PUBLIC_DEFAULT_MODEL=gpt-4\" >> .env",
                                 "echo \"STRIPE_WEBHOOK_SECRET=1\" >> .env",
                                 "echo \"STRIPE_PRO_PLAN_PRICE_ID=1\" >> .env",
                                 "echo \"POSTMARK_SERVER_TOKEN=1\" >> .env",
@@ -384,7 +387,7 @@
                                     ]
                                 },
                                 "echo \"REDIS_URL=redis://localhost:6379\" >> .env",
-                                "echo \"NEXT_PUBLIC_POSTHOG_API_TOKEN=1\" >> .env",
+                                "echo \"NEXT_PUBLIC_POSTHOG_API_TOKEN=phc_vCZb0qNf6Yc3Ko2YczwQsZc91jv87snQ51NabrTuEuw\" >> .env",
                                 "echo \"NEXT_PUBLIC_SENTRY_DSN=1\" >> .env",
                                 "echo \"LOG_LEVEL=debug\" >> .env",
                                 "echo \"QSTASH_CURRENT_SIGNING_KEY=1\" >> .env",
@@ -399,6 +402,7 @@
                                 "echo \"GCLOUD_PRIVATE_KEY=1\" >> .env",
                                 "echo \"NEXT_PUBLIC_SENTRY_ENABLED=false\" >> .env",
                                 "echo \"NEXT_PUBLIC_STRIPE_ENABLED=false\" >> .env",
+                                "echo \"NEXT_PUBLIC_GOOGLE_ENABLED=false\" >> .env",
                                 "echo \"STRIPE_BASIC_PLAN_PRICE_ID=1\" >> .env",
                                 "echo \"NEXT_PUBLIC_BASIC_PLAN_DASHBOARD_CAP=1\" >> .env",
                                 "echo \"NEXT_PUBLIC_BASIC_PLAN_QUESTIONS_CAP=10\" >> .env",
